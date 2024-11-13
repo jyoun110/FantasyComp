@@ -2,10 +2,18 @@
 import pandas as pd
 import yahoo_fantasy_api as yfa
 from yahoo_oauth import OAuth2
+import os
 
 # %%
 #Auth
-sc = OAuth2(None, None, from_file="YahooAuth.json")
+sc = OAuth2(
+    None,
+    None,
+    from_file=None,
+    CONSUMER_KEY=os.getenv("CONSUMER_KEY"),
+    CONSUMER_SECRET=os.getenv("CONSUMER_SECRET"),
+    REFRESH_TOKEN=os.getenv("REFRESH_TOKEN")
+)
 
 # %%
 #Get Game object
