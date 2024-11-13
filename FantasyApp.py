@@ -15,6 +15,10 @@ sc = OAuth2(
     REFRESH_TOKEN=os.getenv("REFRESH_TOKEN")
 )
 
+# Ensure OAuth is authenticated
+if not sc.token_is_valid():
+    sc.refresh_access_token()
+
 # %%
 #Get Game object
 gm = yfa.Game(sc, 'nba')
