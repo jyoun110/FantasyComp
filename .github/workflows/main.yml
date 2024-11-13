@@ -26,7 +26,8 @@ jobs:
           YAHOO_CLIENT_SECRET: ${{ secrets.YAHOO_CLIENT_SECRET }}
           YAHOO_REFRESH_TOKEN: ${{ secrets.YAHOO_REFRESH_TOKEN }}
         run: |
-          python FantasyApp.py  # Your script that connects to Yahoo API and updates the Excel file
+          python FantasyApp.py
+          python app.py
 
       - name: Commit and push changes
         run: |
