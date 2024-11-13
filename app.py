@@ -3,6 +3,7 @@ import streamlit as st
 
 all_data = pd.read_excel('output.xlsx')
 
+
 # Configure Streamlit for wide layout
 st.set_page_config(layout="wide")
 
@@ -10,10 +11,13 @@ st.set_page_config(layout="wide")
 completed_weeks = all_data[all_data['Games Played'].str.split('/').apply(lambda x: int(x[0]) > 0)]
 available_weeks = sorted(completed_weeks['Week'].unique())
 
-# Sidebar for filtering options
-st.sidebar.header("Filter Options")
-selected_week = st.sidebar.selectbox("Select Week", available_weeks, index=0)
-selected_managers = st.sidebar.multiselect("Select Managers (optional)", options=all_data['Manager'].unique())
+# Automatically select the latest available week as the default
+current_week = available_weeks[-1] if available_weeks else None  # Set default to latest completed or ongoing week
+
+# Display Filters at the Top
+st.header("Filter Options")
+selected_week = st.selectbox("Select Week", available_weeks, index=available_weeks.index(current_week) if current_week else 0)
+selected_managers = st.multiselect("Select Managers (optional)", options=all_data['Manager'].unique())
 
 # Filter all_data based on selected week and managers, remove "Week" column for display
 filtered_df = all_data[all_data['Week'] == selected_week].drop(columns=['Week'])
@@ -42,7 +46,7 @@ def highlight_winners(df):
             styles.at[max_idx, col] = 'background-color: lightgreen'
     return styles
 
-# Display the filtered DataFrame with conditional formatting, no index
+# Display the filtered DataFrame with conditional formatting, no index, and optimized for mobile
 if not filtered_df.empty:
     st.header(f"Comparison for Week {selected_week}")
     st.write("Managers:", ', '.join(selected_managers) if selected_managers else "All Managers")
@@ -75,14 +79,23 @@ st.dataframe(season_averages.style.apply(lambda _: highlight_winners(season_aver
 # Season Highs and Lows (excluding current week, Week 1 for lows, and Week 16 for highs)
 highs_lows_data = all_data[(all_data['Week'] != selected_week) & (all_data['Week'] != 'Week 1') & (all_data['Week'] != 'Week 16')]
 
-# Calculate highs and lows with corresponding managers
+# Format specific categories as integers
+integer_categories = ['3PM', 'PTS', 'REB', 'AST', 'STL', 'BLK', 'TO']
+
+# Calculate highs and lows with corresponding managers in a single column
 highs_lows = pd.DataFrame({
     'Category': numeric_cols,
-    'Season High': [highs_lows_data[col].max() for col in numeric_cols],
-    'High Manager': [highs_lows_data.loc[highs_lows_data[col].idxmax(), 'Manager'] for col in numeric_cols],
-    'Season Low': [highs_lows_data[col].min() for col in numeric_cols],
-    'Low Manager': [highs_lows_data.loc[highs_lows_data[col].idxmin(), 'Manager'] for col in numeric_cols]
+    'Season High': [
+        f"{int(highs_lows_data[col].max()) if col in integer_categories else f'{highs_lows_data[col].max():.3f}'} - {highs_lows_data.loc[highs_lows_data[col].idxmax(), 'Manager']}" 
+        for col in numeric_cols
+    ],
+    'Season Low': [
+        f"{int(highs_lows_data[col].min()) if col in integer_categories else f'{highs_lows_data[col].min():.3f}'} - {highs_lows_data.loc[highs_lows_data[col].idxmin(), 'Manager']}"
+        for col in numeric_cols
+    ]
 })
 
-st.header("Season Highs and Lows (Excluding Current Week, Week 1 for Lows, Week 16 for Highs)")
+# Display the Season Highs and Lows with a subheader
+st.subheader("Season Highs and Lows")
+st.markdown("<small>Excluding Current Week, Week 1, Week 16 (All-Star)</small>", unsafe_allow_html=True)
 st.dataframe(highs_lows, use_container_width=True)
