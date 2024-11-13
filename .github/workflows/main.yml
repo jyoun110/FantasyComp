@@ -3,6 +3,7 @@ name: Update Data Daily
 on:
   schedule:
     - cron: "30 7 * * *"  # Runs daily at 2:30 AM ET (7:30 AM UTC)
+  workflow_dispatch:  
 
 jobs:
   update-data:
@@ -26,7 +27,8 @@ jobs:
           YAHOO_CLIENT_SECRET: ${{ secrets.YAHOO_CLIENT_SECRET }}
           YAHOO_REFRESH_TOKEN: ${{ secrets.YAHOO_REFRESH_TOKEN }}
         run: |
-          python FantasyApp.py  # Your script that connects to Yahoo API and updates the Excel file
+          python FantasyApp.py
+          python app.py
 
       - name: Commit and push changes
         run: |
