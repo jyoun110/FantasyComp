@@ -2,22 +2,6 @@
 import pandas as pd
 import yahoo_fantasy_api as yfa
 from yahoo_oauth import OAuth2
-import app
-#import gspread
-
-# %%
-# # Google Sheets setup
-# scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/spreadsheets",
-#          "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
-# creds = ServiceAccountCredentials.from_json_keyfile_name('GoogleApi.json', scope)
-# client = gspread.authorize(creds)
-
-# # Export DataFrame to Google Sheets
-# sheet_name = "Fantasy League Stats"
-# spreadsheet = client.create(sheet_name)
-# worksheet = spreadsheet.sheet1
-# worksheet.update([df.columns.values.tolist()] + df.values.tolist())  # Upload the DataFrame data
-
 
 # %%
 #Auth
@@ -108,5 +92,8 @@ all_data = pd.DataFrame(all_weeks_data)
 
 # %%
 all_data
+
+# %%
+all_data.to_excel('output.xlsx',index=False)
 
 
