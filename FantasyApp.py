@@ -7,6 +7,7 @@ import logging
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logger.disabled = True
 
 def get_oauth():
     """Initialize OAuth2 using credentials from environment variables."""
@@ -14,23 +15,23 @@ def get_oauth():
         # Log environment variable presence (without revealing values)
         logger.info("Checking for environment variables...")
         env_vars = {
-            'CONSUMER_KEY': os.getenv('CONSUMER_KEY'),
-            'CONSUMER_SECRET': os.getenv('CONSUMER_SECRET'),
-            'REFRESH_TOKEN': os.getenv('REFRESH_TOKEN')
+            'YAHOO_CLIENT_ID': os.getenv('YAHOO_CLIENT_ID'),
+            'YAHOO_CLIENT_SECRET': os.getenv('YAHOO_CLIENT_SECRET'),
+            'YAHOO_REFRESH_TOKEN': os.getenv('YAHOO_REFRESH_TOKEN')
         }
         
         missing_vars = [key for key, value in env_vars.items() if not value]
         if missing_vars:
             raise ValueError(f"Missing environment variables: {', '.join(missing_vars)}")
 
-        # Initialize OAuth2
+        # Initialize OAuth2 with the correct mapping of environment variables
         sc = OAuth2(
             None,
             None,
             from_file=None,
-            CONSUMER_KEY=env_vars['CONSUMER_KEY'],
-            CONSUMER_SECRET=env_vars['CONSUMER_SECRET'],
-            REFRESH_TOKEN=env_vars['REFRESH_TOKEN']
+            CONSUMER_KEY=env_vars['YAHOO_CLIENT_ID'],        # Map to CONSUMER_KEY
+            CONSUMER_SECRET=env_vars['YAHOO_CLIENT_SECRET'], # Map to CONSUMER_SECRET
+            REFRESH_TOKEN=env_vars['YAHOO_REFRESH_TOKEN']    # This one matches already
         )
 
         # Verify token validity
