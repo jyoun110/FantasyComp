@@ -9,21 +9,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.13' 
+          
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
+          
       - name: Run data update script
-        env:
-          CONSUMER_KEY: ${{ secrets.YAHOO_CLIENT_ID }}
-          CONSUMER_SECRET: ${{ secrets.YAHOO_CLIENT_SECRET }}
-          REFRESH_TOKEN: ${{ secrets.YAHOO_REFRESH_TOKEN }}
         run: |
           python FantasyApp.py
-          python app.py
+          
       - name: Commit and push changes
         run: |
           git config --local user.email "joeyounes2@gmail.com"
