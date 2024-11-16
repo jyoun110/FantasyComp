@@ -11,6 +11,10 @@ logger = logging.getLogger(__name__)
 def get_oauth():
     """Initialize OAuth2 using credentials from json file."""
     try:
+        print("DEBUG: YAHOO_CONSUMER_KEY =", os.getenv("YAHOO_CONSUMER_KEY"))
+        print("DEBUG: YAHOO_CONSUMER_SECRET =", os.getenv("YAHOO_CONSUMER_SECRET"))
+        print("DEBUG: YAHOO_REFRESH_TOKEN =", os.getenv("YAHOO_REFRESH_TOKEN"))
+        
         sc = OAuth2(
             consumer_key=os.getenv("YAHOO_CONSUMER_KEY"),
             consumer_secret=os.getenv("YAHOO_CONSUMER_SECRET"),
