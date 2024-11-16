@@ -3,6 +3,7 @@ import yahoo_fantasy_api as yfa
 from yahoo_oauth import OAuth2
 import os
 import logging
+import time
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
