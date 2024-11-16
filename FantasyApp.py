@@ -5,18 +5,20 @@ import os
 import logging
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 def get_oauth():
     """Initialize OAuth2 using credentials from json file."""
     try:
+
         sc = OAuth2(
             consumer_key=os.getenv("YAHOO_CONSUMER_KEY"),
             consumer_secret=os.getenv("YAHOO_CONSUMER_SECRET"),
             refresh_token=os.getenv("YAHOO_REFRESH_TOKEN"),
             access_token=os.getenv("YAHOO_ACCESS_TOKEN"),
-            token_type=os.getenv("YAHOO_TOKEN_TYPE")
+            token_type=os.getenv("YAHOO_TOKEN_TYPE"),
+            token_time =os.getenv("YAHOO_TOKEN_TIME")
         )
 
         # Verify token validity
