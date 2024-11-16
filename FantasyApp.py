@@ -19,7 +19,7 @@ def get_oauth():
             refresh_token=os.getenv("YAHOO_REFRESH_TOKEN"),
             access_token=os.getenv("YAHOO_ACCESS_TOKEN"),
             token_type=os.getenv("YAHOO_TOKEN_TYPE"),
-            token_time =os.getenv("YAHOO_TOKEN_TIME")
+            token_time=float(os.getenv("YAHOO_TOKEN_TIME"))
         )
 
         # Verify token validity
