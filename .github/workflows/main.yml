@@ -25,6 +25,7 @@ jobs:
           YAHOO_CONSUMER_KEY: ${{ secrets.YAHOO_CONSUMER_KEY }}
           YAHOO_CONSUMER_SECRET: ${{ secrets.YAHOO_CONSUMER_SECRET }}
           YAHOO_REFRESH_TOKEN: ${{ secrets.YAHOO_REFRESH_TOKEN }}
+          YAHOO_TOKEN_TYPE: ${{ secrets.YAHOO_TOKEN_TYPE }}
         run: |
           python FantasyApp.py
           
