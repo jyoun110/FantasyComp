@@ -17,7 +17,7 @@ def get_oauth():
             consumer_key=os.getenv("YAHOO_CONSUMER_KEY"),
             consumer_secret=os.getenv("YAHOO_CONSUMER_SECRET"),
             refresh_token=os.getenv("YAHOO_REFRESH_TOKEN"),
-            #access_token=os.getenv("YAHOO_ACCESS_TOKEN"),
+            access_token=os.getenv("YAHOO_ACCESS_TOKEN"),
             token_type=os.getenv("YAHOO_TOKEN_TYPE"),
             token_time=float(os.getenv("YAHOO_TOKEN_TIME"))
         )
