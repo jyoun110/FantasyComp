@@ -1,7 +1,7 @@
 name: Update Data Daily
 on:
   schedule:
-    - cron: "0,20,40 0-5 * * *" # Runs 20 min intervals converted to 12 AM to 5 AM UTC (7 PM to 1:30 AM ET)
+    - cron: "20,40 0-6 * * *"  # Every 20 minutes from 00:20 UTC to 06:20 UTC
   workflow_dispatch:  
 jobs:
   update-data:
