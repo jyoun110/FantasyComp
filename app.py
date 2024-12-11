@@ -1,8 +1,6 @@
 import pandas as pd
 import streamlit as st
 import plotly.express as px
-import plotly.graph_objs as go
-import plotly.subplots as sp
 
 # Load data
 all_data = pd.read_excel('output.xlsx')
