@@ -41,25 +41,67 @@ def highlight_winners(df):
     for idx in df.index:
         if idx == 'TO':  # Special case for turnovers, highlight the minimum value
             min_col = df.loc[idx].idxmin()
-            styles.at[idx, min_col] = 'background-color: lightgreen'
+            styles.at[idx, min_col] = 'background-color: green'
         elif idx =='Manager' or idx == 'Games Played':  #Ignore manager name and games played
             continue 
         else:
             max_col = df.loc[idx].idxmax()
-            styles.at[idx, max_col] = 'background-color: lightgreen'
+            styles.at[idx, max_col] = 'background-color: green'
     return styles
 
 
 # Display the filtered DataFrame with conditional formatting, no index, and optimized for mobile
-if not filtered_df.empty:
-    #Transpose rows and columns
-    filtered_df = filtered_df.transpose().copy()
-    filtered_df.columns = filtered_df.iloc[0].reset_index(drop=True)
-    filtered_df = filtered_df.drop(filtered_df.index[0]).astype(str)
+view_type1 = st.radio("View Type",['Weekly Stats', 'Weekly Rank'])
 
-    st.subheader(f"Comparison for Week {selected_week}")
-    st.write("Managers:", ', '.join(selected_managers) if selected_managers else "All Managers")
-    st.dataframe(filtered_df.style.apply(lambda _: highlight_winners(filtered_df), axis=None), use_container_width=False, hide_index=False)
+if view_type1 == 'Weekly Stats':
+    if not filtered_df.empty:
+        #Transpose rows and columns
+        filtered_df = filtered_df.transpose().copy()
+        filtered_df.columns = filtered_df.iloc[0].reset_index(drop=True)
+        filtered_df = filtered_df.drop(filtered_df.index[0]).astype(str)
+
+        st.subheader(f"Comparison for Week {selected_week}")
+        st.write("Managers:", ', '.join(selected_managers) if selected_managers else "All Managers")
+        st.dataframe(filtered_df.style.apply(lambda _: highlight_winners(filtered_df), axis=None), use_container_width=False, hide_index=False)
+
+
+# Add a new condition for the ranking view
+else:
+    # Prepare data for ranking using ALL data for the selected week
+    all_week_data = all_data[all_data['Week'] == selected_week].copy()
+    all_week_data = all_week_data.drop(columns='Week').copy()
+    
+    # Numeric columns to rank (excluding 'Manager' and 'Games Played')
+    rank_columns = [col for col in all_week_data.columns if col not in ['Manager', 'Games Played']]
+    
+    # Convert to numeric for proper ranking
+    for col in rank_columns:
+        all_week_data[col] = pd.to_numeric(all_week_data[col], errors='coerce')
+    
+    # Calculate dense rankings for each statistic
+    rankings = {}
+    for col in rank_columns:
+        # Sort in descending order for most stats (except TO where lower is better)
+        ascending = True if col == 'TO' else False
+        
+        # Calculate dense rank
+        col_ranks = all_week_data.sort_values(by=col, ascending=ascending).reset_index()
+        col_ranks['Rank'] = col_ranks[col].rank(method='dense', ascending=ascending)
+        
+        # Store rankings in a dictionary
+        rankings[col] = col_ranks.set_index('Manager')['Rank']
+    
+    # Combine rankings into a single DataFrame
+    ranking_df = pd.DataFrame(rankings)
+    
+    # Display ranking view
+    st.subheader(f"Weekly Rankings for Week {selected_week}")
+    
+    # Filter DataFrame for selected managers if any
+    display_df = ranking_df.loc[selected_managers] if selected_managers else ranking_df
+    
+    # Display the ranking DataFrame
+    st.dataframe(display_df, use_container_width=True)
 
 # Season Averages for Completed Weeks
 completed_weeks_df = completed_weeks.drop(columns=['Week'])
@@ -100,26 +142,14 @@ st.subheader("Season Averages")
 st.markdown("<small>Completed Weeks Only</small>", unsafe_allow_html=True)
 
 # Create a toggle for view type
-view_type = st.radio("View Type", ["Table", "Stat Comparison"])
+view_type2 = st.radio("View Type", ["Overall Averages", "Average Comparison"])
 
 season_averages = season_averages.transpose().copy()
 season_averages.columns = season_averages.iloc[0].reset_index(drop=True)
 season_averages = season_averages.drop(season_averages.index[0]).astype(str)
 
 
-if view_type == "Table":
-    # Your existing table view
-    #Transpose rows and columns
-    # season_averages = season_averages.transpose().copy()
-    # season_averages.columns = season_averages.iloc[0].reset_index(drop=True)
-    # season_averages = season_averages.drop(season_averages.index[0]).astype(str)
-
-    st.dataframe(season_averages.style.apply(lambda _: highlight_winners(season_averages), axis=None), 
-                 column_config={column: st.column_config.TextColumn(width="small") for column in season_averages.columns}, 
-                 use_container_width=True)
-
-
-else:
+if view_type2 == "Average Comparison":
     # Scatter Plot View
     # First, reset index and convert to regular DataFrame
     plot_df = season_averages.reset_index()
@@ -135,21 +165,12 @@ else:
     
     # Iterate through managers (assuming they start from the third column)
     for manager in plot_df.columns[2:]:
-        try:
-            # Find the value for the selected stat
-            stat_value = plot_df.loc[plot_df['index'] == selected_stat, manager].values[0]
-            
-            # Convert to float, handling potential string representations
-            try:
-                stat_value = float(stat_value)
-            except ValueError:
-                # If conversion fails, skip this data point
-                continue
-            
-            plot_data.append({'Manager': manager, 'Value': stat_value})
-        except IndexError:
-            st.error(f"Could not find {selected_stat} in the data")
+        stat_value = plot_df.loc[plot_df['index'] == selected_stat, manager].values[0]
     
+        # Convert to float, handling potential string representations
+        stat_value = float(stat_value)
+        plot_data.append({'Manager': manager, 'Value': stat_value})
+
     plot_df_scatter = pd.DataFrame(plot_data)
     plot_df_scatter = plot_df_scatter.sort_values('Value', ascending=False).reset_index(drop=True)
     plot_df_scatter['Rank'] = plot_df_scatter.index + 1
@@ -161,19 +182,30 @@ else:
                     labels={'Value': selected_stat})
 
     # Customize the plot
-    fig.update_traces(marker=dict(size=10, color='blue', symbol='circle'))
+    fig.update_traces(marker=dict(size=10, color='green', symbol='circle'))
     fig.update_layout(
-        xaxis_title='Manager',
-        yaxis_title=f'Average {selected_stat}',
-        height=500
-    )
+    xaxis_title='Manager',
+    yaxis_title=f'Average {selected_stat}',
+    height=500,
+    # Disable zooming and panning
+    xaxis=dict(fixedrange=True),
+    yaxis=dict(fixedrange=True),
+    # Prevent touch interactions from zooming
+    dragmode=False)
 
-    # Display the plot
+    # Ensure hover is still enabled
+    fig.update_traces(hovertemplate='<b>%{x}</b><br>Value: %{y:.2f}<extra></extra>')
+    
     st.plotly_chart(fig, use_container_width=True)
+
+else:
+    st.dataframe(season_averages.style.apply(lambda _: highlight_winners(season_averages), axis=None), 
+                column_config={column: st.column_config.TextColumn(width="small") for column in season_averages.columns}, 
+                use_container_width=True)
 
 # Season Highs and Lows (excluding current week, Week 1 for lows, and Week 16 for highs)
 # Ensure season highs and lows are calculated independently of current filters
-highs_lows_data = all_data[~(all_data['Week'].isin([current_week, 1, 7, 16]))]
+highs_lows_data = all_data[~(all_data['Week'].isin([current_week, 1, 16]))]
 
 # Format specific categories as integers
 integer_categories = ['3PM', 'PTS', 'REB', 'AST', 'STL', 'BLK', 'TO']
