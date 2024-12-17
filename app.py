@@ -21,7 +21,7 @@ selected_week = st.selectbox("Select Week", available_weeks, index=available_wee
 selected_managers = st.multiselect("Select Managers (optional)", options=all_data['Manager'].unique())
 
 # Filter all_data based on selected week and managers, remove "Week" column for display
-filtered_df = all_data[all_data['Week'] == selected_week].drop(columns=['Week'])
+filtered_df = all_data[all_data['Week'] == selected_week].drop(columns=['Week']).copy()
 if selected_managers:
     filtered_df = filtered_df[filtered_df['Manager'].isin(selected_managers)]
 
@@ -36,17 +36,29 @@ for col in filtered_df.columns:
 numeric_cols = [col for col in filtered_df.columns if col not in ['Manager', 'Games Played']]
 
 # Conditional formatting function to highlight winning categories
+# Conditional formatting function to highlight winning categories
 def highlight_winners(df):
+    # Create a copy of the DataFrame and convert to numeric
+    numeric_df = df.copy()
+
+    # Convert columns to numeric, handling potential string representations
+    for col in numeric_df.columns:
+        if col not in ['Manager', 'Games Played']:
+            numeric_df[col] = pd.to_numeric(numeric_df[col], errors='coerce')
+    
+    # Create styles DataFrame
     styles = pd.DataFrame('', index=df.index, columns=df.columns)
-    for idx in df.index:
+    
+    for idx in numeric_df.index:
         if idx == 'TO':  # Special case for turnovers, highlight the minimum value
-            min_col = df.loc[idx].idxmin()
+            min_col = numeric_df.loc[idx].idxmin()
             styles.at[idx, min_col] = 'background-color: green'
-        elif idx =='Manager' or idx == 'Games Played':  #Ignore manager name and games played
+        elif idx == 'Manager' or idx == 'Games Played':  # Ignore manager name and games played
             continue 
         else:
-            max_col = df.loc[idx].idxmax()
+            max_col = numeric_df.loc[idx].idxmax()
             styles.at[idx, max_col] = 'background-color: green'
+    
     return styles
 
 
