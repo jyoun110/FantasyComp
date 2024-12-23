@@ -215,9 +215,9 @@ else:
                 column_config={column: st.column_config.TextColumn(width="small") for column in season_averages.columns}, 
                 use_container_width=True)
 
-# Season Highs and Lows (excluding current week, Week 1 for lows, and Week 16 for highs)
+# Season Highs and Lows (excluding current week, Week 1 for lows, Week 7 (NBA Cup) and Week 16 for highs)
 # Ensure season highs and lows are calculated independently of current filters
-highs_lows_data = all_data[~(all_data['Week'].isin([current_week, 1, 16]))]
+highs_lows_data = all_data[~(all_data['Week'].isin([current_week, 1, 7,16]))]
 
 # Format specific categories as integers
 integer_categories = ['3PM', 'PTS', 'REB', 'AST', 'STL', 'BLK', 'TO']
