@@ -176,7 +176,7 @@ if view_type2 == "Average Comparison":
     plot_data = []
     
     # Iterate through managers (assuming they start from the third column)
-    for manager in plot_df.columns[2:]:
+    for manager in plot_df.columns[1:]:
         stat_value = plot_df.loc[plot_df['index'] == selected_stat, manager].values[0]
     
         # Convert to float, handling potential string representations
