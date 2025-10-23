@@ -9,6 +9,14 @@ import time
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
+import os
+import logging
+from yahoo_oauth import OAuth2
+
+# Logging setup
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 def get_oauth():
     """Initialize OAuth2 using credentials from json file."""
     try:
@@ -33,7 +41,6 @@ def get_oauth():
     except Exception as e:
         logger.error(f"OAuth initialization failed: {str(e)}")
         raise
-
 
 def main():
     # Categories dictionary remains the same
@@ -61,7 +68,7 @@ def main():
         all_weeks_data = []
         
         # Rest of your data collection code remains the same
-        for week in range(1, 24):
+        for week in range(1, 23):
             data = league.matchups(week=week)['fantasy_content']['league'][1]['scoreboard']['0']['matchups']
             
             for matchup_id, matchup_data in data.items():
