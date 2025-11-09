@@ -217,25 +217,36 @@ else:
 
 # Season Highs and Lows (excluding current week, Week 1 for lows, Week 7 (NBA Cup) and Week 16 for highs)
 # Ensure season highs and lows are calculated independently of current filters
-highs_lows_data = all_data[~(all_data['Week'].isin([current_week, 1, 7,16]))]
+highs_lows_data = all_data[~(all_data['Week'].isin([current_week, 1, 7, 16]))].copy()
 
-# Format specific categories as integers
 integer_categories = ['3PM', 'PTS', 'REB', 'AST', 'STL', 'BLK', 'TO']
 
-# Calculate highs and lows with corresponding managers and weeks in a single column
-highs_lows = pd.DataFrame({
-    'Category': numeric_cols,
-    'Season High': [
-        f"{int(highs_lows_data[col].max()) if col in integer_categories else f'{highs_lows_data[col].max():.3f}'} - {highs_lows_data.loc[highs_lows_data[col].idxmax(), 'Manager']} - Week {highs_lows_data.loc[highs_lows_data[col].idxmax(), 'Week']}" 
-        for col in numeric_cols
-    ],
-    'Season Low': [
-        f"{int(highs_lows_data[col].min()) if col in integer_categories else f'{highs_lows_data[col].min():.3f}'} - {highs_lows_data.loc[highs_lows_data[col].idxmin(), 'Manager']} - Week {highs_lows_data.loc[highs_lows_data[col].idxmin(), 'Week']}"
-        for col in numeric_cols
-    ]
-})
+# Safely compute highs and lows
+records = []
+for col in numeric_cols:
+    # Skip if column missing or all NaN
+    if col not in highs_lows_data.columns or highs_lows_data[col].dropna().empty:
+        continue
 
-# Display the Season Highs and Lows with a subheader
+    max_idx = highs_lows_data[col].idxmax()
+    min_idx = highs_lows_data[col].idxmin()
+
+    # Skip if idxmax/idxmin return NaN
+    if pd.isna(max_idx) or pd.isna(min_idx):
+        continue
+
+    # Build strings
+    max_val = int(highs_lows_data.loc[max_idx, col]) if col in integer_categories else round(highs_lows_data.loc[max_idx, col], 3)
+    min_val = int(highs_lows_data.loc[min_idx, col]) if col in integer_categories else round(highs_lows_data.loc[min_idx, col], 3)
+
+    max_str = f"{max_val} - {highs_lows_data.loc[max_idx, 'Manager']} - Week {highs_lows_data.loc[max_idx, 'Week']}"
+    min_str = f"{min_val} - {highs_lows_data.loc[min_idx, 'Manager']} - Week {highs_lows_data.loc[min_idx, 'Week']}"
+
+    records.append({'Category': col, 'Season High': max_str, 'Season Low': min_str})
+
+# Create DataFrame
+highs_lows = pd.DataFrame(records)
+
 st.subheader("Season Highs and Lows")
 st.markdown("<small>Excluding Current Week, Week 1, Week 7 (NBA Cup), Week 16 (All-Star)</small>", unsafe_allow_html=True)
 st.dataframe(highs_lows, use_container_width=True, hide_index=True)
